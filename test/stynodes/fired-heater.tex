@@ -1,0 +1,9 @@
+\unitop[fired heater, wd=2cm, ht=2cm, anchor=in] (b) at (3,0) {};
+\coordinate[right=3cm] (c) at (b.out);
+\draw[->] (a) -- (b.in);
+\draw[->] (b.out) -- (c);
+
+\draw (a) -- (b.chimney west);
+\draw (a) -- (b.chimney east);
+\draw (a) -- (b.body west);
+\draw (a) -- (b.body east);

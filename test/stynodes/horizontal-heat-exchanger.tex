@@ -1,0 +1,8 @@
+\unitop[horizontal heat exchanger, minimum size=2cm] (b) at (3,0) {};
+\coordinate (c) at (6, 0);
+\draw[->] (a.out) -- (b.exin);
+\draw[->] (b.exout) -- (c);
+\coordinate (d) at (3, -3);
+\coordinate (e) at (3, 3);
+\draw[->] (d) -- (b.south);
+\draw[->] (b.north) -- (e);

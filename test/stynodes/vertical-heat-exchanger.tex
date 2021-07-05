@@ -1,0 +1,8 @@
+\unitop[vertical heat exchanger, minimum size=2cm] (b) at (3,0) {};
+\coordinate (c) at (6, 0);
+\draw[->] (a.out) -- (b.in);
+\draw[->] (b.out) -- (c);
+\coordinate (d) at (3, -3);
+\coordinate (e) at (3, 3);
+\draw[->] (d) -- (b.exin) node[pos=0, below] {cw};
+\draw[->] (b.north) -- (e) node[pos=1, above] {cw};

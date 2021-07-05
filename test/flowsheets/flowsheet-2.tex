@@ -1,0 +1,128 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{pgfpfd}
+\usetikzlibrary{calc}
+
+\begin{document}
+\Large % set node text to large
+
+\tikzset{tall skinny/.style={wd=1cm,ht=3cm}}
+\begin{tikzpicture}[line width=2pt]
+
+%\draw [help lines] (0,0) grid (40,40);
+% this lets you (approximately) find the absolute positions
+% note you can "lock" part of the flow in place which is using relative positions when editing a previous part of the flow
+% by just defining a dummy coordinate which is kept static
+
+% note input/output directions are not well-defined for top-bottom in PFDs (only left-to-right)
+% hence the input and output designations are arbitrary and can be swapped for those
+
+\unitop[input,small,label=270:Feed Gas] (i1) at (0,0);
+\unitop[reactor,above right,tall skinny] (r1) at ([xshift=2cm,yshift=4cm]i1.north east)
+  node[above left] (r1label) at (r1.north) {R-101};
+\unitop[reactor,right,tall skinny] (r2) at ([xshift=4cm]r1.east)
+  node[above left] (r2label) at (r2.north) {R-102};
+\unitop[fired heater, large, above, anchor=south west] (h1) at ([xshift=4cm]r2.south east)
+  node[above left] () at (h1.north) {H-101};
+\unitop[vertical heat exchanger, small, below right] (e1) at ([xshift=2cm,yshift=-2cm]h1.out)
+  node[below] (e1exin) at ([yshift=-1cm]e1.south) {bfw} % note: will have to draw streams to these nodes later
+  node[above] (e1exout) at ([yshift=1cm]e1.north) {lps};
+\unitop[vertical heat exchanger, small, above right] (e2) at ([xshift=2cm,yshift=2cm]e1.out)
+  node[below] (e2exin) at ([yshift=-1cm]e2.south) {bfw}
+  node[above] (e2exout) at ([yshift=1cm]e2.north) {lps};
+\unitop[reactor,above right,tall skinny] (r3) at ([xshift=2cm,yshift=2cm]e2.out)
+  node[above left] (r3label) at (r3.north) {R-103};
+\unitop[vertical heat exchanger, small] (e3) at ([xshift=3cm,yshift=-2cm]r3.south)
+% to place this symmetrically, calculate x-midpoint of r3 and r4. see later
+  node[below] (e3exin) at ([yshift=-1cm]e3.south) {bfw}
+  node[above] (e3exout) at ([yshift=1cm]e3.north) {lps};
+\unitop[reactor,right, tall skinny] (r4) at ([xshift=4cm]r3.east)
+  node[above left] (r4label) at (r4.north) {R-104};
+\unitop[vertical heat exchanger, right, small] (e4) at ([xshift=3cm,yshift=-2cm]r4.south east)
+  node[below] (e4exin) at ([yshift=-1cm]e4.south) {bfw}
+  node[above] (e4exout) at ([yshift=1cm]e4.north) {bfw};
+\unitop[horizontal heat exchanger, above right, small] (e5) at ([xshift=2cm,yshift=3cm]e4.north east)
+  node[left] (e5exin) at ([xshift=-1cm]e5.west) {cw};
+\unitop[flash, tall skinny, anchor=west] (v1) at ([xshift=3cm, yshift=1cm]e5.north east)
+  node[above left] (v1label) at (v1.north) {V-101};
+\unitop[reactor,above right,tall skinny] (r5) at ([xshift=3cm,yshift=3cm]v1.north east)
+  node[above left] (r5label) at (r5.north) {R-105};
+\unitop[reactor,right,tall skinny] (r6) at ([rb]r5.east);
+\unitop[reactor,right,tall skinny] (r7) at ([rb]r6.east);
+\unitop[reactor,right,tall skinny] (r8) at ([rb]r7.east);
+\unitop[output, small, right] (o1) at ([xshift=3cm,yshift=1cm]r8.north east)
+  node[below] (o1label) at (o1.south) {Hydrogen};
+\unitop[output, small, right] (o2) at ([xshift=3cm]r8.east)
+  node[below] (o2label) at (o2.south) {Off-gas};
+\unitop[expander, above, medium] (f1) at ([xshift=3cm,yshift=6cm]h1.north)
+  node[above right] (f1label) at (f1.low pressure) {F-101};
+%% drawing streams 
+\stream (i1.out) -| (r1.south);
+%
+\stream (r1.north) -- ([tb]r1.north) -| ($(r1.north)!0.5!(r2.south)$) |- ([bb]r2.south) -- (r2.south);
+%
+% somewhat inelegant, but need to access the point and so can't use simple projection and |-
+% the \path let operation lets you compute components of points from an arbitrarily large set of points
+% see alternative at 
+\path let \p1=([tb]r2.north),\p2=(h1.in),\p3=([bb]r2.south) in 
+  coordinate (m1) at (.5*\x1+.5*\x2,\y1)
+  coordinate (m2) at (.5*\x1+.5*\x2,\y2)
+  coordinate (m3) at (.5*\x1+.5*\x2,\y3);
+\stream (r2.north) -- ([tb]r2.north) -- (m1) -- (m2) -- (h1.in);
+\stream (m3) -- (m2) node[below,pos=0] {hps}; 
+\stream	(h1.north) |- (f1.high pressure);
+\stream	(f1.low pressure) --++ (3,0);
+\stream
+	(h1.out) -| ($(h1.out)!0.5!(e1.in)$) |- (e1.in);
+\stream
+	(e1.out) -| ($(e1.out)!0.5!(e2.in)$) |- (e2.in);
+\stream
+	(e2.out) -| (r3.south);
+\stream
+	(r3.north) -- ([tb]r3.north) -| ($(r3.north)!0.5!(e3.in)$) |- (e3.in);
+\stream
+	(e3.out) -| (r4.south);
+\stream
+	(r4.north) -- ([tb]r4.north) -| ($(r4.north)!0.5!(e4.in)$) |- (e4.in);
+\stream
+	(e4.out) -| (e5.south);
+\stream
+	(e5.north) |- (v1.west);
+\draw
+	(v1.north) |- ([bb]r8.south);
+\stream (v1.north) |- ([bb]r5.south) -- (r5.south);
+\stream (v1.north) |- ([bb]r6.south) -- (r6.south);
+\stream (v1.north) |- ([bb]r7.south) -- (r7.south);
+\stream (v1.north) |- ([bb]r8.south) -- (r8.south);
+\draw
+	([tb]r5.north) -- ([tb]r8.north);
+\stream (r5.north) -- ([tb]r5.north);
+\stream (r6.north) -- ([tb]r6.north);
+\stream (r7.north) -- ([tb]r7.north);
+\stream (r8.north) -- ([tb]r8.north); 
+\stream
+	([tb]r8.north) -- (o1.in);
+\stream
+	(r5.west) -- (o2.in);
+
+\foreach\x in {e1,e2,e3,e4}
+  {\stream (\x exin) -- (\x.south);
+  \stream (\x.north) -- (\x exout);}
+
+\stream (e5exin) -- (e5.exin);
+
+% PFDs have summaries across the top
+\path let \p1=(o1.north) in
+  coordinate (topleft) at (0, \y1 + 1cm);
+
+\node[above right, align=left] (r1-desc) at (topleft) {R-101\\Feed Gas\\Desulferizer}
+ node[right, align=left] (r2-desc) at (r1-desc.east) {R-102\\Feed Gas\\Desulferizer 2}
+ node[right, align=left] (h1-desc) at (r2-desc.east) {H-101\\Steam Methane Reforming\\Fired Heater}
+ node[right, align=left] (f1-desc) at (h1-desc.east) {F-101\\Flue Gas\\Expander}
+ node[right, align=left] (r3-desc) at (f1-desc.east) {R-103\\Syngas\\WGS-High Temp}
+ node[right, align=left] (r4-desc) at (r3-desc.east) {R-104\\Syngas\\WGS-Low Temp}
+ node[right, align=left] (v1-desc) at (r4-desc.east) {V-101\\Flash\\Hydrogen/Carbon Oxides/Water}
+ node[right, align=left] (r5-desc) at (v1-desc.east) {R-105\\Hydrogen/Carbon Oxides/Residual Water\\Pressure Swing Adsorption};
+
+\end{tikzpicture}
+\end{document}

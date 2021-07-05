@@ -1,0 +1,20 @@
+\documentclass[tikz]{standalone}
+\usepackage{pgfpfd}
+
+\begin{document}
+                          
+\begin{tikzpicture}
+% expander/compressor
+\node [expander, minimum width=2cm] (expander) at (0,0) {};
+\node [compressor, minimum width=2cm] (compressor) at (3,0) {};
+
+\draw[->] (-3,0) -- (expander.high pressure);
+\draw[->] (expander.low pressure) -- (compressor.low pressure);
+\draw[->] (compressor.high pressure) --++ (3,0);
+
+% gas flow: chamfered rectangle with high chamfered rectangle xsep to keep long hexagon from being chamfered
+\node[gas flow, above=1cm] (alter) at (1.5,0) {123};
+\draw (alter) -- (1.5,0);
+
+\end{tikzpicture}
+\end{document}

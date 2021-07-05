@@ -1,0 +1,735 @@
+\ProvidesPackage{pgfpfd}
+%
+% Notes
+%
+% pgf base macros don't support linear combinations.  For example, pgfqpoint
+% and pgfpoint allow only sums. pgfmathparse commands (CH 95 of the manual) can
+% do linear combinations.  But the result is converted to points and returned
+% as dimensionless.  As a result of this, there is often annoying increment,
+% pass to function, then decrement, that is, explicit arithmetic managemant
+% rather than implicit through parsing and order of operations.  The plain TeX
+% \advance\dimen0 by<sign><factor>\dimen1 lets you increment a variable by some
+% scalar combination, at least.
+%
+% pgf macros will generally change \pgf@x and \pgf@y so don't use these
+% for anything except between plain TeX commands like \advance or assignment.
+% many macros will redefine TeX registers like \pgf@{xa,xb,xc,ya,yb,yc}
+%
+\pgfdeclareshape{input}{
+    \inheritsavedanchors[from=circle] % centerpoint
+    \inheritanchor[from=circle]{center}
+    \inheritanchor[from=circle]{mid}
+    \inheritanchor[from=circle]{base}
+    \inheritanchor[from=circle]{south}
+    \inheritanchor[from=circle]{north}
+    \inheritanchor[from=circle]{east}
+    \inheritanchor[from=circle]{west}
+    \inheritanchor[from=circle]{south west}
+    \inheritanchor[from=circle]{north west}
+    \inheritanchor[from=circle]{south east}
+    \inheritanchor[from=circle]{north east}
+    \inheritanchorborder[from=circle]
+    %
+    % see definition of \radius in circle node style
+    \anchor{out}{\centerpoint\advance\pgf@x by\radius}
+    %
+    \backgroundpath{
+    % note that due to outersep, \radius != .5 max(minimum width, minimum height)
+    \pgfmathsetlength{\pgf@xa}{\pgfkeysvalueof{/pgf/minimum width}}%
+    \pgfmathsetlength{\pgf@ya}{\pgfkeysvalueof{/pgf/minimum height}}%
+    \ifdim\pgf@xa<\pgf@ya
+        \pgfutil@tempdima=.5\pgf@ya
+    \else
+        \pgfutil@tempdima=.5\pgf@xa
+    \fi
+    \pgf@process{\centerpoint}
+    \advance\pgf@y by\pgfutil@tempdima
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpatharc{90}{-90}{\pgfutil@tempdima}
+    \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfusepath{fill}
+    \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}%
+    \pgfusepath{stroke}
+  }%
+}
+
+\pgfdeclareshape{output}{
+    \inheritsavedanchors[from=circle] % centerpoint
+    \inheritanchor[from=circle]{center}
+    \inheritanchor[from=circle]{mid}
+    \inheritanchor[from=circle]{base}
+    \inheritanchor[from=circle]{south}
+    \inheritanchor[from=circle]{north}
+    \inheritanchor[from=circle]{east}
+    \inheritanchor[from=circle]{west}
+    \inheritanchor[from=circle]{south west}
+    \inheritanchor[from=circle]{north west}
+    \inheritanchor[from=circle]{south east}
+    \inheritanchor[from=circle]{north east}
+    \inheritanchorborder[from=circle]
+    %
+    \anchor{in}{\centerpoint\advance\pgf@x by-\radius}
+    %
+    \backgroundpath{% need to get minimum width/height (which is what this is designed to be used for)
+    % note that due to outersep, \radius != .5 max(minimum width, minimum height)
+    \pgfmathsetlength{\pgf@xa}{\pgfkeysvalueof{/pgf/minimum width}}%
+    \pgfmathsetlength{\pgf@ya}{\pgfkeysvalueof{/pgf/minimum height}}%
+    \ifdim\pgf@xa<\pgf@ya
+        \pgfutil@tempdima=.5\pgf@ya
+    \else
+        \pgfutil@tempdima=.5\pgf@xa
+    \fi
+    \pgf@process{\centerpoint}
+    \advance\pgf@y by\pgfutil@tempdima
+    \pgf@xa=\pgf@x
+    \pgf@ya=\pgf@y
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpatharc{90}{270}{\pgfutil@tempdima}
+    \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfusepath{fill}
+    \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}%
+    \pgfusepath{stroke}
+  }%
+}
+%
+% More sophisticated shapes will just have background paths drawn into
+% "bounding box" rectangle nodes, with special interior anchors for positioning
+% and drawing streams between.  For every interior anchor, one may define an
+% anchor boundary point to align to the x- and y-positions of that anchor on
+% the rectangular boundary. For every interior anchor, there are 4 such points
+% corresponding to y-W, y-E, x-N, and x-S, where x and y are the position and
+% NSEW are the edges on the bounding box.
+\pgfdeclareshape{pump}{% as circle
+    % note this definition will cause lines to go through the pump triangle base, 
+    % and doesn't allow you to align to the pump base
+    % for that, one needs a rectangle node definition
+    \inheritsavedanchors[from=circle] % centerpoint
+    \inheritanchor[from=circle]{center}
+    \inheritanchor[from=circle]{mid}
+    \inheritanchor[from=circle]{base}
+    \inheritanchor[from=circle]{south}
+    \inheritanchor[from=circle]{north}
+    \inheritanchor[from=circle]{east}
+    \inheritanchor[from=circle]{west}
+    \inheritanchor[from=circle]{south west}
+    \inheritanchor[from=circle]{north west}
+    \inheritanchor[from=circle]{south east}
+    \inheritanchor[from=circle]{north east}
+    \inheritanchorborder[from=circle]
+    \anchor{out}{\centerpoint\advance\pgf@x by\radius}
+    \anchor{in}{\centerpoint\advance\pgf@x by-\radius}
+    \backgroundpath{
+    \pgfmathsetlength{\pgf@xa}{\pgfkeysvalueof{/pgf/minimum width}}%
+    \pgfmathsetlength{\pgf@ya}{\pgfkeysvalueof{/pgf/minimum height}}%
+    \ifdim\pgf@xa<\pgf@ya
+        \pgfutil@tempdima=.5\pgf@ya
+    \else
+        \pgfutil@tempdima=.5\pgf@xa
+    \fi
+    \pgf@process{\centerpoint} % centerpoint is the origin
+    \pgfmoveto{\pgfpointpolar{240}{2.\pgfutil@tempdima}}
+    \pgfpathlineto{\centerpoint}
+    \pgfpathlineto{\pgfpointpolar{300}{2.\pgfutil@tempdima}}
+    \pgfpathclose
+    \pgfusepath{stroke}
+    \color{white} % TODO: specify as primary/secondary colors
+    \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}
+    \pgfusepath{fill}
+    \color{black}
+    \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}
+    \pgfusepath{stroke}
+   }
+}
+%
+\def\backpathhe{
+        \pgfmathsetlength{\pgf@xa}{\pgfkeysvalueof{/pgf/minimum width}}%
+        \pgfmathsetlength{\pgf@ya}{\pgfkeysvalueof{/pgf/minimum height}}%
+        \ifdim\pgf@xa<\pgf@ya
+            \pgfutil@tempdima=.5\pgf@ya
+        \else
+            \pgfutil@tempdima=.5\pgf@xa
+        \fi
+        \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}
+        \pgf@process{\centerpoint}
+        \pgf@xa=\pgf@x
+        \pgf@ya=\pgf@y
+        % note: pgfpointadd and multiply can be used, too
+        \pgf@yc=\pgf@ya
+        \pgfmathsetlength{\pgf@xc}{\pgf@xa-1.\pgfutil@tempdima}
+        \pgfmoveto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfmathsetlength{\pgf@xc}{\pgf@xa-.8\pgfutil@tempdima}
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfmathsetlength{\pgf@xc}{\pgf@xa-.4\pgfutil@tempdima}
+        \pgfmathsetlength{\pgf@yc}{\pgf@ya-.8\pgfutil@tempdima}
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfmathsetlength{\pgf@xc}{\pgf@xa+.4\pgfutil@tempdima}
+        \pgfmathsetlength{\pgf@yc}{\pgf@ya+.8\pgfutil@tempdima}
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfmathsetlength{\pgf@xc}{\pgf@xa+.8\pgfutil@tempdima}
+        \pgfmathsetlength{\pgf@yc}{\pgf@ya}
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfmathsetlength{\pgf@xc}{\pgf@xa+1.\pgfutil@tempdima}
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfusepath{stroke}
+}
+%
+\pgfdeclareshape{horizontal heat exchanger}{
+    \inheritsavedanchors[from=circle] % centerpoint
+    \inheritanchor[from=circle]{center}
+    \inheritanchor[from=circle]{mid}
+    \inheritanchor[from=circle]{base}
+    \inheritanchor[from=circle]{south}
+    \inheritanchor[from=circle]{north}
+    \inheritanchor[from=circle]{east}
+    \inheritanchor[from=circle]{west}
+    \inheritanchor[from=circle]{south west}
+    \inheritanchor[from=circle]{north west}
+    \inheritanchor[from=circle]{south east}
+    \inheritanchor[from=circle]{north east}
+    \inheritanchorborder[from=circle]
+    \backgroundpath{\backpathhe}
+    % definitions will fail when inner/outer seps are non-zero since \radius includes them
+    \anchor{in}{\centerpoint\advance\pgf@y by-\radius}
+    \anchor{out}{\centerpoint\advance\pgf@y by-\radius}
+    \anchor{exin}{\centerpoint\advance\pgf@x by-\radius} 
+    \anchor{exout}{\centerpoint\advance\pgf@x by\radius}
+}
+%
+\pgfdeclareshape{vertical heat exchanger}{
+    \inheritsavedanchors[from=circle] % centerpoint
+    \inheritanchor[from=circle]{center}
+    \inheritanchor[from=circle]{mid}
+    \inheritanchor[from=circle]{base}
+    \inheritanchor[from=circle]{south}
+    \inheritanchor[from=circle]{north}
+    \inheritanchor[from=circle]{east}
+    \inheritanchor[from=circle]{west}
+    \inheritanchor[from=circle]{south west}
+    \inheritanchor[from=circle]{north west}
+    \inheritanchor[from=circle]{south east}
+    \inheritanchor[from=circle]{north east}
+    \inheritanchorborder[from=circle]
+    \backgroundpath{\pgftransformrotate{90}\backpathhe}
+    \anchor{in}{\centerpoint\advance\pgf@x by-\radius}
+    \anchor{out}{\centerpoint\advance\pgf@x by\radius}
+    \anchor{exin}{\centerpoint\advance\pgf@y by-\radius}
+    \anchor{exout}{\centerpoint\advance\pgf@y by\radius}
+}
+%
+\pgfdeclareshape{valve}{
+    \inheritsavedanchors[from=rectangle] % southwest and northeast
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{north west}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{mid}
+    \inheritanchor[from=rectangle]{base}
+    \inheritanchorborder[from=rectangle]
+    \anchor{in}{% synonym for west
+        \pgf@process{\northeast}
+        \pgf@ya=\pgf@y
+        \pgf@process{\southwest}
+        \pgf@yb=\pgf@y
+        \pgf@y=.5\pgf@ya
+        \advance\pgf@y by.5\pgf@yb
+        }
+    \anchor{out}{% synonym for east
+        \pgf@process{\southwest}
+        \pgf@yb=\pgf@y
+        \pgf@process{\northeast}
+        \pgf@ya=\pgf@y
+        \pgf@y=.5\pgf@ya
+        \advance\pgf@y by.5\pgf@yb
+        }
+    \backgroundpath{
+        \pgf@process{\northeast}%
+        \pgf@xa=\pgf@x%
+        \pgf@ya=\pgf@y%
+        \pgf@process{\southwest}%
+        \pgf@xb=\pgf@x%
+        \pgf@yb=\pgf@y%
+        \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}%
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yb}}%
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}%
+        \pgflineto{\pgfpoint{\pgf@xa}{\pgf@yb}}%
+        \pgfpathclose
+        \pgfusepath{stroke}
+    }
+         % decorative handle is possible, but not necessary
+%        \pgfusepath{stroke}
+%        \pgf@xc=.5\pgf@xa
+%        \advance\pgf@xc by-.5\pgf@xb
+%        \pgf@yc=.5\pgf@ya
+%        \advance\pgf@yc by-.5\pgf@yb
+%        \pgfmoveto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+%        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@ya}}
+%        \pgfmoveto{\pgfpoint{\pgf@xc+\somethickness}{\pgf@ya}}
+%        \pgflineto{\pgfpoint{\pgf@xc-\somethickness}{\pgf@ya}}
+%        \pgfusepath{stroke}
+}
+%
+\newdimen\bheight
+\newdimen\bwidth
+%
+\def\nesw@hw{%
+        % store northeast and southwest coordinates
+        \pgf@process{\northeast}
+        \pgf@xa=\pgf@x
+        \pgf@ya=\pgf@y
+        \pgf@process{\southwest}
+        \pgf@xb=\pgf@x
+        \pgf@yb=\pgf@y
+        % calculate height and width
+        \bwidth=\pgf@xa
+        \advance\bwidth by-\pgf@xb
+        \bheight=\pgf@ya
+        \advance\bheight by-\pgf@yb}
+%
+\def\squares@{
+        \nesw@hw
+        % calculate the corners of the two squares
+        \pgf@xc=\pgf@xa
+        \advance\pgf@xc by-.4\bwidth
+        \pgf@xd=\pgf@xb
+        \advance\pgf@xd by.4\bwidth
+        \pgf@yc=\pgf@ya
+        \advance\pgf@yc by-.4\bheight
+        \pgf@yd=\pgf@yb
+        \advance\pgf@yd by.4\bheight}
+%
+\pgfdeclareshape{big pump}{
+    \inheritsavedanchors[from=rectangle] % northeast and southwest
+    \inheritanchor[from=rectangle]{center} % this is a necessary anchor
+    \inheritanchor[from=rectangle]{mid}
+    \inheritanchor[from=rectangle]{base}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=rectangle]{north west}
+    %
+    \inheritanchorborder[from=rectangle]
+% note: can't \savemacro which uses anchor coordinates (these are only available in some places)
+% one can def somewhere else (that is what \squares@ does)
+    \backgroundpath{
+        \squares@
+         % \pgfpathrectanglecorners writes dimension registers
+         % one can define a "marshal" command using \edef and \noexpand
+%        \pgfpathrectanglecorners{\pgfpoint{\pgf@xa}{\pgf@ya}}{\pgfpoint{\pgf@xb}{\pgf@yc}} % top square
+%        \pgfpathrectanglecorners{\pgfpoint{\pgf@xb}{\pgf@yb}}{\pgfpoint{\pgf@xa}{\pgf@yd}} % bottom square
+%        \pgfpathrectanglecorners{\pgfpoint{\pgf@xc}{\pgf@yc}}{\pgfpoint{\pgf@xd}{\pgf@yd}} % connecting rectangle
+        \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+        \pgflineto{\pgfpoint{\pgf@xa}{\pgf@yc}}
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+        \pgfpathclose
+        \pgfmoveto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+        \pgflineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+        \pgflineto{\pgfpoint{\pgf@xa}{\pgf@yd}}
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yd}}
+        \pgfpathclose
+        \pgfmoveto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgflineto{\pgfpoint{\pgf@xd}{\pgf@yc}}
+        \pgflineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yd}}
+        \pgfpathclose
+        \pgfusepath{stroke}
+    }
+    \anchor{top west}{\squares@\pgf@x=\pgf@xb\pgf@y=.5\pgf@yc\advance\pgf@y by.5\pgf@ya} % this is the west of the top square
+    \anchor{bottom west}{\squares@\pgf@x=\pgf@xb\pgf@y=.5\pgf@yd\advance\pgf@y by.5\pgf@yb} % this is the west of the bottom square
+    \anchor{top east}{\squares@\pgf@x=\pgf@xa\pgf@y=.5\pgf@yc\advance\pgf@y by.5\pgf@ya} % this is the east of the top square
+    \anchor{bottom east}{\squares@\pgf@x=\pgf@xa\pgf@y=.5\pgf@yd\advance\pgf@y by.5\pgf@yb} % this is the east of the bottom square
+}
+\pgfdeclareshape{fired heater}{
+    \inheritsavedanchors[from=rectangle] % northeast and southwest
+    \inheritanchor[from=rectangle]{center} % this is a necessary anchor
+    \inheritanchor[from=rectangle]{mid}
+    \inheritanchor[from=rectangle]{base}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=rectangle]{south east}
+    % east and west don't exist on the shape border
+    % but may be used for positioning
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{east}
+    %
+    \inheritanchorborder[from=rectangle]
+    \backgroundpath{\nesw@hw
+        \pgf@xc=\pgf@xb
+        \pgf@yc=\pgf@yb
+        \pgfmoveto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@yc by.4\bheight
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@xc by.4\bwidth
+        \advance\pgf@yc by.2\bheight
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@yc by.4\bheight
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@xc by.2\bwidth
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@yc by-.4\bheight
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@xc by.4\bwidth
+        \advance\pgf@yc by-.2\bheight
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@yc by-.4\bheight
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfpathclose
+        \pgfusepath{stroke}
+        \pgf@xc=\pgf@xb
+        \pgf@yc=\pgf@yb
+        \advance\pgf@yc by.1\bheight
+        \pgfmoveto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \advance\pgf@xc by.8\bwidth
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}} 
+        \advance\pgf@yc by.2\bheight
+        \advance\pgf@xc by-.6\bwidth
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}} 
+        \advance\pgf@xc by.8\bwidth
+        \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+        \pgfusepath{stroke}
+    }
+    \anchor{in}{\nesw@hw\pgf@x=\pgf@xb\pgf@y=\pgf@yb\advance\pgf@y by.1\bheight}
+    \anchor{out}{\nesw@hw\pgf@x=\pgf@xa\pgf@y=\pgf@ya\advance\pgf@y by-.7\bheight}
+    \anchor{body west}{\nesw@hw\pgf@x=\pgf@xb\pgf@y=\pgf@yb\advance\pgf@y by.2\bheight}
+    \anchor{body east}{\nesw@hw\pgf@x=\pgf@xa\pgf@y=\pgf@yb\advance\pgf@y by.2\bheight}
+    \anchor{chimney west}{\nesw@hw\pgf@x=\pgf@xb\advance\pgf@x by.4\bwidth\pgf@y=\pgf@yb\advance\pgf@y by.8\bheight}
+    \anchor{chimney east}{\nesw@hw\pgf@x=\pgf@xa\advance\pgf@x by-.4\bwidth\pgf@y=\pgf@yb\advance\pgf@y by.8\bheight}
+}
+%
+% vessels, reactors, flash, and towers are all rectangles with semicircle caps
+% and a small variation on aspect ratio of rectangle and background path
+% see pgfutil@g@addto@macro to avoid redefining the background path parts
+%
+% One could rounding the corners of a rectangle with the Tikz option, though that option is given in absolute radius
+% it can be calculated. There is already a rounded rectangle shape provided in the pgf shape.misc libraries, too.
+%
+% to fix the height of the rounded part, one would not do a semicircle but instead 
+% an arc whose start and end angle are computed to ensure a circle segment height
+% equations: R = h/2 + c^2/(8h)
+% sin(theta/2) = c/(2R)
+% start angle = pi/2 - theta/2
+% end angle = pi/2 + theta/2
+%
+% there are also more elegant (=faster) logic flows
+%
+\def\ne@rr{
+    \nesw@hw % depends on NW and SE anchors of rectangle
+    \ifdim\bwidth<\bheight % vertical reactor
+        \pgfutil@tempdima=.5\bwidth
+        \pgf@yc=\pgf@ya
+        \advance\pgf@yc by-\pgfutil@tempdima
+        \pgf@xc=\pgf@xa
+    \else % horizontal 
+        \pgfutil@tempdima=.5\bheight
+        \pgf@xc=\pgf@xa
+        \advance\pgf@xc by-\pgfutil@tempdima
+        \pgf@yc=\pgf@ya
+    \fi
+}
+\def\bpath@rr{
+    \ne@rr
+    \ifdim\bwidth<\bheight % vertical reactor
+        \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@yc}}
+        \pgfpatharc{0}{180}{\pgfutil@tempdima}
+        \pgf@yc=\pgf@yb
+        \advance\pgf@yc by\pgfutil@tempdima
+        \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+        \pgfpatharc{180}{360}{\pgfutil@tempdima}
+    \else % horizontal 
+        \pgfmoveto{\pgfpoint{\pgf@xc}{\pgf@ya}}
+        \pgfpatharc{90}{-90}{\pgfutil@tempdima}
+        \pgf@xc=\pgf@xb
+        \advance\pgf@xc by\pgfutil@tempdima
+        \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+        \pgfpatharc{-90}{-270}{\pgfutil@tempdima}
+    \fi
+    \pgfpathclose
+    \pgfusepath{stroke}
+}
+% see the same shape, with accurate shape border, defined in shapes.misc pgf library
+\pgfdeclareshape{roundedrectangle}{
+    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{north west}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchorborder[from=rectangle]
+    \anchor{round north east}{
+        \nesw@hw
+        \ifdim\bwidth<\bheight
+            \pgf@x=\pgf@xa
+            \pgf@y=\pgf@ya
+            \advance\pgf@y by-.5\bwidth
+        \else
+            \pgf@x=\pgf@xa
+            \advance\pgf@x by-.5\bheight
+            \pgf@y=\pgf@ya
+        \fi
+    }
+    \anchor{round north west}{
+        \nesw@hw
+        \ifdim\bwidth<\bheight
+            \pgf@x=\pgf@xb
+            \pgf@y=\pgf@ya
+            \advance\pgf@y by-.5\bwidth
+        \else
+            \pgf@x=\pgf@xb
+            \advance\pgf@x by.5\bheight
+            \pgf@y=\pgf@ya
+        \fi
+    }
+    \anchor{round south west}{
+        \nesw@hw
+        \ifdim\bwidth<\bheight
+            \pgf@x=\pgf@xb
+            \pgf@y=\pgf@yb
+            \advance\pgf@y by.5\bwidth
+        \else
+            \pgf@x=\pgf@xb
+            \advance\pgf@x by.5\bheight
+            \pgf@y=\pgf@yb
+        \fi}
+    \anchor{round south east}{
+        \nesw@hw
+        \ifdim\bwidth<\bheight
+            \pgf@x=\pgf@xa
+            \pgf@y=\pgf@yb
+            \advance\pgf@y by.5\bwidth
+        \else
+            \pgf@x=\pgf@xa
+            \advance\pgf@x by-.5\bheight
+            \pgf@y=\pgf@yb
+        \fi}
+    \backgroundpath{\bpath@rr}
+}
+\pgfdeclareshape{reactor}{
+    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{north west}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=roundedrectangle]{round north east}
+    \inheritanchor[from=roundedrectangle]{round north west}
+    \inheritanchor[from=roundedrectangle]{round south west}
+    \inheritanchor[from=roundedrectangle]{round south east}
+    \inheritanchorborder[from=rectangle]
+    \backgroundpath{\bpath@rr
+    \ifdim\bwidth<\bheight
+        \advance\pgf@ya by-\pgfutil@tempdima
+        \advance\pgf@yb by\pgfutil@tempdima
+        \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+        \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+    \else
+        \advance\pgf@xa by-\pgfutil@tempdima
+        \advance\pgf@xb by\pgfutil@tempdima
+        \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+        \pgflineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+        \pgfmoveto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+        \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+    \fi
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+    \pgfmoveto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+    \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgfusepath{stroke}
+    }
+}
+\pgfdeclareshape{flash}{
+    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{north west}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=roundedrectangle]{round north east}
+    \inheritanchor[from=roundedrectangle]{round north west}
+    \inheritanchor[from=roundedrectangle]{round south west}
+    \inheritanchor[from=roundedrectangle]{round south east}
+    \inheritanchorborder[from=rectangle]
+    \backgroundpath{\bpath@rr
+    % flash tanks should never be horizontal
+    \advance\pgf@ya by-1.2\pgfutil@tempdima
+    \advance\pgf@yb by\pgfutil@tempdima
+    \pgfmoveto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgflineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \advance\pgf@ya by-.2\pgfutil@tempdima
+    \pgflineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgfclosepath
+    \pgfusepath{fill}
+    \advance\pgf@ya by-.2\pgfutil@tempdima
+    \pgfmoveto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \advance\pgf@xb by.5\pgfutil@tempdima
+    \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \advance\pgf@yb by\pgfutil@tempdima
+    \advance\pgf@xb by.2\pgfutil@tempdima
+    \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+    \pgfusepath{stroke}
+    }
+}
+% towers may be drawn with a variable number of stages.  if the pgf key "number
+% stages" is passed, it will divide the length of the tower into equal
+% increments of stages to be drawn with dashed lines.  these dashed lines are
+% drawn symmetrically by calculation using a dash length like 1en (not using
+% patterns/TikZ macros).  
+\pgfset{number stages/.initial=5,stage dash width/.initial=5pt}
+\newdimen\xone
+\newdimen\xtwo
+\newdimen\yone
+\newdimen\ytwo
+\newdimen\stagesep
+\newdimen\stageheight
+\pgfdeclareshape{tower}{
+    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{north west}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=roundedrectangle]{round north east}
+    \inheritanchor[from=roundedrectangle]{round north west}
+    \inheritanchor[from=roundedrectangle]{round south west}
+    \inheritanchor[from=roundedrectangle]{round south east}
+    \inheritanchorborder[from=rectangle]
+    \backgroundpath{
+        \bpath@rr
+        % towers should never be horizontal
+        \advance\pgf@ya by-\pgfutil@tempdima
+        \advance\pgf@yb by\pgfutil@tempdima
+        \xone=\pgf@xb
+        \xtwo=\pgf@xa
+        \yone=\pgf@yb
+        \ytwo=\pgf@ya
+        % draw caps
+        \pgfutil@tempdimb=.05\pgfutil@tempdima
+        \pgfsetlinewidth{\pgfutil@tempdimb}
+        \pgfmoveto{\pgfpoint{\xtwo}{\ytwo}}
+        \pgflineto{\pgfpoint{\xone}{\ytwo}}
+        \pgfmoveto{\pgfpoint{\xtwo}{\yone}}
+        \pgflineto{\pgfpoint{\xone}{\yone}}
+        \pgfusepath{stroke}
+        \pgfsetlinewidth{.4pt} % TeX and LaTeX default for lines and rules
+        %
+        \bheight=\ytwo
+        \advance\bheight by-\yone
+        %
+        \bwidth=\xtwo
+        \advance\bwidth by-\xone
+        %
+        \count10=\pgfkeysvalueof{/pgf/number stages}
+        \countdef\nstages=10
+        %
+        \advance\nstages by1% for division and loop condition
+        \pgfmathdivide{\pgfmath@tonumber{\bheight}}{\nstages} % result is reported dimensionless, turning pt -> nothing
+        \pgf@yc=\pgfmathresult pt\relax
+        % no divmod or remainder calculator, so inefficiently get the remainder (phase for dash)
+        \pgfutil@tempdimb=\pgfkeysvalueof{/pgf/stage dash width}
+        \pgfmathdivide@{\pgfmath@tonumber{\bwidth}}{\pgfmath@tonumber{\pgfutil@tempdimb}} % note again dimensionless
+        \let\temp=\pgfmathresult
+        \pgfmathdiv@{\pgfmath@tonumber{\bwidth}}{\pgfmath@tonumber{\pgfutil@tempdimb}}
+        \pgfmathsubtract@{\pgfmathresult}{\temp} % note using \pgfmathresult only works for first arg, since \temp is \let to \pgfmathresult
+        \pgfmathdivide@{\pgfmathresult}{2}
+        \pgfutil@tempdima=\pgfmathresult\pgfutil@tempdimb % won't use tempdima later
+        \pgfsetdash{{\pgfutil@tempdimb}}{\the\pgfutil@tempdima}
+        % \pgfmathloop is not in manual, but I found it in pgf shape libraries 
+        % will reset various counters like \pgf@{xa,ya,xb,yb} between loop iterations
+        \stageheight=\ytwo
+        \stagesep=\pgf@yc
+        \xone=\xone
+        \xtwo=\xtwo
+        \pgfmathloop%
+            \ifnum\pgfmathcounter=\nstages%
+            \else%
+                \advance\stageheight by-\stagesep%
+                \pgfmoveto{\pgfpoint{\xone}{\stageheight}}%
+                \pgflineto{\pgfpoint{\xtwo}{\stageheight}}%
+        \repeatpgfmathloop%
+        \pgfusepath{stroke}%
+   }
+}
+%% LIBNODES
+% a way to alias anchors 
+% https://tex.stackexchange.com/questions/145134
+\newcommand*\pgfdeclareanchoralias[3]{%
+    \expandafter\def\csname pgf@anchor@#1@#3\expandafter\endcsname
+            \expandafter{\csname pgf@anchor@#1@#2\endcsname}}
+%
+\usetikzlibrary{shapes}
+\usetikzlibrary{arrows.meta}
+%
+\pgfdeclareanchoralias{trapezium}{bottom side}{low pressure}
+\pgfdeclareanchoralias{trapezium}{top side}{high pressure}
+%
+\pgfkeys{/tikz/ht/.forward to=/tikz/minimum height,/tikz/wd/.forward to=/tikz/minimum width}
+%
+\tikzset{
+sid/.style={pos=0.5,diamond,draw,fill=white},
+temperature/.style={rectangle,draw,minimum width=1.5cm},
+pressure/.style={trapezium,draw,minimum width=1.5cm},
+mass flow/.style={trapezium, draw, trapezium left angle=60, trapezium right angle=120},
+liquid flow/.style={signal, draw, signal to=nowhere,signal from=east and west},
+mole flow/.style={draw,rounded corners=0.25cm,minimum width=1.5cm},
+expander/.style={draw, trapezium, shape border uses incircle, shape border rotate=90},
+compressor/.style={draw, trapezium, shape border uses incircle, shape border rotate=270},
+gas flow/.style={draw, chamfered rectangle, chamfered rectangle xsep=10cm},
+stream/.style={-{Latex[length=3mm]}},
+every pic/.style={small},
+small/.style={minimum size=1cm},
+medium/.style={minimum size=2cm},
+large/.style={minimum size=3cm},
+rb/.style={xshift=1cm},
+rB/.style={xshift=1.5cm},
+tb/.style={yshift=1cm},
+tB/.style={yshift=1.5cm},
+lb/.style={xshift=-1cm},
+lB/.style={xshift=-1.5cm},
+bb/.style={yshift=-1cm},
+bB/.style={yshift=-1.5cm}}
+%
+\def\stream{\draw[stream]}
+% custom parsing
+\def\unitop{\tikz@path@overlay{coordinate}} % will recognize \unitop
+% you need to edit the \tikz@handle or \tikz@handle@more macros to parse this 
+% these macros initialize a value for \pgfutil@next, use nested if/else statements, then call \pgfutil@next
+%\def\tikz@u@char nitop{\tikz@coordinate}
+%\let\temp=\tikz@handle
+%\def\tikz@handle{
+%\ifx\pgf@let@token u%
+%  \let\pgfutil@next=\tikz@u@char
+%  \pgfutil@next
+%\else
+%  \temp
+%\fi
+%}

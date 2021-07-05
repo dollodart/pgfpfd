@@ -1,0 +1,57 @@
+\documentclass[border=10pt]{standalone}
+\usepackage{tikz}
+\usepackage{pgfpfd}
+%
+\begin{document}
+% syntax is 
+% \node[<options>] (<name>) at (<location>) {<node text>};
+% node text is empty
+% \unitop can only be used as a command sequence (with backslash)
+%
+\begin{tikzpicture}
+% positioning unit operations
+% unit operations can be placed with coordinate system (good for independent adjustment of positions)
+% or relative to another unit operation (good for visual alignment)
+% they can also be anchored (default is place center) at ports to align them
+%
+\unitop[input, small, label=270:A] (i1) at (0,0);
+\unitop[input, small, label=270:B]  (i2) at (0,-10);
+\unitop[valve, small] (v1) at ([xshift=3cm]i1.east);
+\unitop[fired heater, large, anchor=in] (h1) at ([xshift=3cm]v1.out)
+  node[above right] (h1label) at (h1.north) {H-101};
+\unitop[vertical heat exchanger, small, label=45:E-101] (e1) at ([xshift=3cm]h1.out);
+\unitop[tower, ht=8cm, wd=1cm, number stages=8] (t1) at ([xshift=5cm]e1.out)
+  node[above right] (t1label) at (t1.east) {T-101};
+\unitop[output, small, label=270:C] (o1) at ([xshift=3cm,tB]t1.north);
+\unitop[big pump, wd=1.5cm, ht=3cm, anchor=top west] (p1) at ([xshift=3cm]i2.out)
+  node[above right] (p1label) at (p1.north east) {P-101};
+%
+% drawing streams
+\stream (v1.out) -- ([rb]v1.out) |- (h1.in) node[sid] {2}; 
+\stream (h1.out) -- ([rb]h1.out) |- (e1.in) node[sid] (sid3) {3}; % labeling this node for future reference
+%
+\stream ([bB]h1.south) -- (h1.south) node[pos=0,below] {fg};
+\stream ([lB,bB]h1.south) -- ([lB]h1.south) node[pos=0,below] {air};
+\stream (h1.north) -- ([tB]h1.north) node[pos=1,above] {exhaust};
+%
+\stream (e1.out) -- ([rb]e1.out) |- ([tb]t1.north) node[pos=0.5, sid] {5} -- (t1.north);
+\stream ([bB]t1.south) -- (t1.south) node[pos=0, below] (sparge) {sparge};
+\stream (t1.round north east) -- ([rB]t1.round north east) |- (o1.in);
+%
+\stream (i2.out) -- ([rB]i2.out) |- (p1.top west);
+\stream (p1.north) -- ([tB]p1.north) |- (sparge) node[sid] {4};
+%
+\stream (t1.round south east) -- ([rB]t1.round south east) node[pos=1,right] {Waste};
+%
+% drawing stream ids
+\draw (i1.out) -- (v1.in) node[sid] {1};
+% example of all possible stream descriptors
+\node[pressure,below=1cm] (p3) at (sid3.south) {100}
+node[temperature,below] (t3) at (p3.south) {573}
+node[mass flow,below] (m3) at (t3.south) {1500}
+node[mole flow,below] (ml3) at (m3.south) {120}
+node[liquid flow,below] (l3) at (ml3.south) {1400}
+node[gas flow,below] (g3) at (l3.south) {100};
+\draw (p3) -- (sid3);
+\end{tikzpicture}
+\end{document}
