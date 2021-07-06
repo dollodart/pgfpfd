@@ -15,7 +15,7 @@
 % for anything except between plain TeX commands like \advance or assignment.
 % many macros will redefine TeX registers like \pgf@{xa,xb,xc,ya,yb,yc}
 %
-\pgfdeclareshape{input}{
+\def\inheritcircle{
     \inheritsavedanchors[from=circle] % centerpoint
     \inheritanchor[from=circle]{center}
     \inheritanchor[from=circle]{mid}
@@ -28,8 +28,24 @@
     \inheritanchor[from=circle]{north west}
     \inheritanchor[from=circle]{south east}
     \inheritanchor[from=circle]{north east}
-    \inheritanchorborder[from=circle]
-    %
+}
+\def\inheritrectangle{%
+    \inheritsavedanchors[from=rectangle] % southwest and northeast
+    \inheritanchor[from=rectangle]{east}
+    \inheritanchor[from=rectangle]{north east}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{north west}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{south west}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{south east}
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{mid}
+    \inheritanchor[from=rectangle]{base}
+}
+
+\pgfdeclareshape{input}{
+    \inheritcircle
     % see definition of \radius in circle node style
     \anchor{out}{\centerpoint\advance\pgf@x by\radius}
     %
@@ -53,22 +69,11 @@
     \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}%
     \pgfusepath{stroke}
   }%
+    \inheritanchorborder[from=circle]
 }
 
 \pgfdeclareshape{output}{
-    \inheritsavedanchors[from=circle] % centerpoint
-    \inheritanchor[from=circle]{center}
-    \inheritanchor[from=circle]{mid}
-    \inheritanchor[from=circle]{base}
-    \inheritanchor[from=circle]{south}
-    \inheritanchor[from=circle]{north}
-    \inheritanchor[from=circle]{east}
-    \inheritanchor[from=circle]{west}
-    \inheritanchor[from=circle]{south west}
-    \inheritanchor[from=circle]{north west}
-    \inheritanchor[from=circle]{south east}
-    \inheritanchor[from=circle]{north east}
-    \inheritanchorborder[from=circle]
+    \inheritcircle
     %
     \anchor{in}{\centerpoint\advance\pgf@x by-\radius}
     %
@@ -92,6 +97,7 @@
     \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}%
     \pgfusepath{stroke}
   }%
+    \inheritanchorborder[from=circle]
 }
 %
 % More sophisticated shapes will just have background paths drawn into
@@ -105,19 +111,7 @@
     % note this definition will cause lines to go through the pump triangle base, 
     % and doesn't allow you to align to the pump base
     % for that, one needs a rectangle node definition
-    \inheritsavedanchors[from=circle] % centerpoint
-    \inheritanchor[from=circle]{center}
-    \inheritanchor[from=circle]{mid}
-    \inheritanchor[from=circle]{base}
-    \inheritanchor[from=circle]{south}
-    \inheritanchor[from=circle]{north}
-    \inheritanchor[from=circle]{east}
-    \inheritanchor[from=circle]{west}
-    \inheritanchor[from=circle]{south west}
-    \inheritanchor[from=circle]{north west}
-    \inheritanchor[from=circle]{south east}
-    \inheritanchor[from=circle]{north east}
-    \inheritanchorborder[from=circle]
+    \inheritcircle
     \anchor{out}{\centerpoint\advance\pgf@x by\radius}
     \anchor{in}{\centerpoint\advance\pgf@x by-\radius}
     \backgroundpath{
@@ -141,6 +135,7 @@
     \pgfpathcircle{\centerpoint}{\pgfutil@tempdima}
     \pgfusepath{stroke}
    }
+    \inheritanchorborder[from=circle]
 }
 %
 \def\backpathhe{
@@ -176,62 +171,28 @@
 }
 %
 \pgfdeclareshape{horizontal heat exchanger}{
-    \inheritsavedanchors[from=circle] % centerpoint
-    \inheritanchor[from=circle]{center}
-    \inheritanchor[from=circle]{mid}
-    \inheritanchor[from=circle]{base}
-    \inheritanchor[from=circle]{south}
-    \inheritanchor[from=circle]{north}
-    \inheritanchor[from=circle]{east}
-    \inheritanchor[from=circle]{west}
-    \inheritanchor[from=circle]{south west}
-    \inheritanchor[from=circle]{north west}
-    \inheritanchor[from=circle]{south east}
-    \inheritanchor[from=circle]{north east}
-    \inheritanchorborder[from=circle]
-    \backgroundpath{\backpathhe}
+    \inheritcircle
     % definitions will fail when inner/outer seps are non-zero since \radius includes them
     \anchor{in}{\centerpoint\advance\pgf@y by-\radius}
     \anchor{out}{\centerpoint\advance\pgf@y by-\radius}
     \anchor{exin}{\centerpoint\advance\pgf@x by-\radius} 
     \anchor{exout}{\centerpoint\advance\pgf@x by\radius}
+    \backgroundpath{\backpathhe}
+    \inheritanchorborder[from=circle]
 }
 %
 \pgfdeclareshape{vertical heat exchanger}{
-    \inheritsavedanchors[from=circle] % centerpoint
-    \inheritanchor[from=circle]{center}
-    \inheritanchor[from=circle]{mid}
-    \inheritanchor[from=circle]{base}
-    \inheritanchor[from=circle]{south}
-    \inheritanchor[from=circle]{north}
-    \inheritanchor[from=circle]{east}
-    \inheritanchor[from=circle]{west}
-    \inheritanchor[from=circle]{south west}
-    \inheritanchor[from=circle]{north west}
-    \inheritanchor[from=circle]{south east}
-    \inheritanchor[from=circle]{north east}
-    \inheritanchorborder[from=circle]
-    \backgroundpath{\pgftransformrotate{90}\backpathhe}
+    \inheritcircle
     \anchor{in}{\centerpoint\advance\pgf@x by-\radius}
     \anchor{out}{\centerpoint\advance\pgf@x by\radius}
     \anchor{exin}{\centerpoint\advance\pgf@y by-\radius}
     \anchor{exout}{\centerpoint\advance\pgf@y by\radius}
+    \backgroundpath{\pgftransformrotate{90}\backpathhe}
+    \inheritanchorborder[from=circle]
 }
 %
 \pgfdeclareshape{valve}{
-    \inheritsavedanchors[from=rectangle] % southwest and northeast
-    \inheritanchor[from=rectangle]{east}
-    \inheritanchor[from=rectangle]{north east}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{north west}
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{south west}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{south east}
-    \inheritanchor[from=rectangle]{center}
-    \inheritanchor[from=rectangle]{mid}
-    \inheritanchor[from=rectangle]{base}
-    \inheritanchorborder[from=rectangle]
+    \inheritrectangle
     \anchor{in}{% synonym for west
         \pgf@process{\northeast}
         \pgf@ya=\pgf@y
@@ -273,6 +234,7 @@
 %        \pgfmoveto{\pgfpoint{\pgf@xc+\somethickness}{\pgf@ya}}
 %        \pgflineto{\pgfpoint{\pgf@xc-\somethickness}{\pgf@ya}}
 %        \pgfusepath{stroke}
+    \inheritanchorborder[from=rectangle]
 }
 %
 \newdimen\bheight
@@ -305,22 +267,13 @@
         \advance\pgf@yd by.4\bheight}
 %
 \pgfdeclareshape{big pump}{
-    \inheritsavedanchors[from=rectangle] % northeast and southwest
-    \inheritanchor[from=rectangle]{center} % this is a necessary anchor
-    \inheritanchor[from=rectangle]{mid}
-    \inheritanchor[from=rectangle]{base}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{east}
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{north east}
-    \inheritanchor[from=rectangle]{south east}
-    \inheritanchor[from=rectangle]{south west}
-    \inheritanchor[from=rectangle]{north west}
-    %
-    \inheritanchorborder[from=rectangle]
-% note: can't \savemacro which uses anchor coordinates (these are only available in some places)
-% one can def somewhere else (that is what \squares@ does)
+    \inheritrectangle
+    % note: can't \savemacro which uses anchor coordinates (these are only available in some places)
+    % one can def somewhere else (that is what \squares@ does)
+    \anchor{top west}{\squares@\pgf@x=\pgf@xb\pgf@y=.5\pgf@yc\advance\pgf@y by.5\pgf@ya} % this is the west of the top square
+    \anchor{bottom west}{\squares@\pgf@x=\pgf@xb\pgf@y=.5\pgf@yd\advance\pgf@y by.5\pgf@yb} % this is the west of the bottom square
+    \anchor{top east}{\squares@\pgf@x=\pgf@xa\pgf@y=.5\pgf@yc\advance\pgf@y by.5\pgf@ya} % this is the east of the top square
+    \anchor{bottom east}{\squares@\pgf@x=\pgf@xa\pgf@y=.5\pgf@yd\advance\pgf@y by.5\pgf@yb} % this is the east of the bottom square
     \backgroundpath{
         \squares@
          % \pgfpathrectanglecorners writes dimension registers
@@ -345,26 +298,18 @@
         \pgfpathclose
         \pgfusepath{stroke}
     }
-    \anchor{top west}{\squares@\pgf@x=\pgf@xb\pgf@y=.5\pgf@yc\advance\pgf@y by.5\pgf@ya} % this is the west of the top square
-    \anchor{bottom west}{\squares@\pgf@x=\pgf@xb\pgf@y=.5\pgf@yd\advance\pgf@y by.5\pgf@yb} % this is the west of the bottom square
-    \anchor{top east}{\squares@\pgf@x=\pgf@xa\pgf@y=.5\pgf@yc\advance\pgf@y by.5\pgf@ya} % this is the east of the top square
-    \anchor{bottom east}{\squares@\pgf@x=\pgf@xa\pgf@y=.5\pgf@yd\advance\pgf@y by.5\pgf@yb} % this is the east of the bottom square
+    \inheritanchorborder[from=rectangle]
 }
 \pgfdeclareshape{fired heater}{
-    \inheritsavedanchors[from=rectangle] % northeast and southwest
-    \inheritanchor[from=rectangle]{center} % this is a necessary anchor
-    \inheritanchor[from=rectangle]{mid}
-    \inheritanchor[from=rectangle]{base}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{south west}
-    \inheritanchor[from=rectangle]{south east}
-    % east and west don't exist on the shape border
+    \inheritrectangle
+    % east and west from rectangle don't exist on the shape border
     % but may be used for positioning
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{east}
-    %
-    \inheritanchorborder[from=rectangle]
+    \anchor{in}{\nesw@hw\pgf@x=\pgf@xb\pgf@y=\pgf@yb\advance\pgf@y by.1\bheight}
+    \anchor{out}{\nesw@hw\pgf@x=\pgf@xa\pgf@y=\pgf@ya\advance\pgf@y by-.7\bheight}
+    \anchor{body west}{\nesw@hw\pgf@x=\pgf@xb\pgf@y=\pgf@yb\advance\pgf@y by.2\bheight}
+    \anchor{body east}{\nesw@hw\pgf@x=\pgf@xa\pgf@y=\pgf@yb\advance\pgf@y by.2\bheight}
+    \anchor{chimney west}{\nesw@hw\pgf@x=\pgf@xb\advance\pgf@x by.4\bwidth\pgf@y=\pgf@yb\advance\pgf@y by.8\bheight}
+    \anchor{chimney east}{\nesw@hw\pgf@x=\pgf@xa\advance\pgf@x by-.4\bwidth\pgf@y=\pgf@yb\advance\pgf@y by.8\bheight}
     \backgroundpath{\nesw@hw
         \pgf@xc=\pgf@xb
         \pgf@yc=\pgf@yb
@@ -400,12 +345,7 @@
         \pgflineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
         \pgfusepath{stroke}
     }
-    \anchor{in}{\nesw@hw\pgf@x=\pgf@xb\pgf@y=\pgf@yb\advance\pgf@y by.1\bheight}
-    \anchor{out}{\nesw@hw\pgf@x=\pgf@xa\pgf@y=\pgf@ya\advance\pgf@y by-.7\bheight}
-    \anchor{body west}{\nesw@hw\pgf@x=\pgf@xb\pgf@y=\pgf@yb\advance\pgf@y by.2\bheight}
-    \anchor{body east}{\nesw@hw\pgf@x=\pgf@xa\pgf@y=\pgf@yb\advance\pgf@y by.2\bheight}
-    \anchor{chimney west}{\nesw@hw\pgf@x=\pgf@xb\advance\pgf@x by.4\bwidth\pgf@y=\pgf@yb\advance\pgf@y by.8\bheight}
-    \anchor{chimney east}{\nesw@hw\pgf@x=\pgf@xa\advance\pgf@x by-.4\bwidth\pgf@y=\pgf@yb\advance\pgf@y by.8\bheight}
+    \inheritanchorborder[from=rectangle]
 }
 %
 % vessels, reactors, flash, and towers are all rectangles with semicircle caps
@@ -460,17 +400,7 @@
 }
 % see the same shape, with accurate shape border, defined in shapes.misc pgf library
 \pgfdeclareshape{roundedrectangle}{
-    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
-    \inheritanchor[from=rectangle]{center}
-    \inheritanchor[from=rectangle]{east}
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{north east}
-    \inheritanchor[from=rectangle]{north west}
-    \inheritanchor[from=rectangle]{south east}
-    \inheritanchor[from=rectangle]{south west}
-    \inheritanchorborder[from=rectangle]
+    \inheritrectangle
     \anchor{round north east}{
         \nesw@hw
         \ifdim\bwidth<\bheight
@@ -518,23 +448,14 @@
             \pgf@y=\pgf@yb
         \fi}
     \backgroundpath{\bpath@rr}
+    \inheritanchorborder[from=rectangle]
 }
 \pgfdeclareshape{reactor}{
-    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
-    \inheritanchor[from=rectangle]{center}
-    \inheritanchor[from=rectangle]{east}
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{north east}
-    \inheritanchor[from=rectangle]{north west}
-    \inheritanchor[from=rectangle]{south east}
-    \inheritanchor[from=rectangle]{south west}
+    \inheritrectangle
     \inheritanchor[from=roundedrectangle]{round north east}
     \inheritanchor[from=roundedrectangle]{round north west}
     \inheritanchor[from=roundedrectangle]{round south west}
     \inheritanchor[from=roundedrectangle]{round south east}
-    \inheritanchorborder[from=rectangle]
     \backgroundpath{\bpath@rr
     \ifdim\bwidth<\bheight
         \advance\pgf@ya by-\pgfutil@tempdima
@@ -557,23 +478,14 @@
     \pgflineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
     \pgfusepath{stroke}
     }
+    \inheritanchorborder[from=rectangle]
 }
 \pgfdeclareshape{flash}{
-    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
-    \inheritanchor[from=rectangle]{center}
-    \inheritanchor[from=rectangle]{east}
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{north east}
-    \inheritanchor[from=rectangle]{north west}
-    \inheritanchor[from=rectangle]{south east}
-    \inheritanchor[from=rectangle]{south west}
+    \inheritrectangle
     \inheritanchor[from=roundedrectangle]{round north east}
     \inheritanchor[from=roundedrectangle]{round north west}
     \inheritanchor[from=roundedrectangle]{round south west}
     \inheritanchor[from=roundedrectangle]{round south east}
-    \inheritanchorborder[from=rectangle]
     \backgroundpath{\bpath@rr
     % flash tanks should never be horizontal
     \advance\pgf@ya by-1.2\pgfutil@tempdima
@@ -594,6 +506,7 @@
     \pgflineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
     \pgfusepath{stroke}
     }
+    \inheritanchorborder[from=rectangle]
 }
 % towers may be drawn with a variable number of stages.  if the pgf key "number
 % stages" is passed, it will divide the length of the tower into equal
@@ -608,21 +521,11 @@
 \newdimen\stagesep
 \newdimen\stageheight
 \pgfdeclareshape{tower}{
-    \inheritsavedanchors[from=rectangle] % north east and south west of bounding rectangle
-    \inheritanchor[from=rectangle]{center}
-    \inheritanchor[from=rectangle]{east}
-    \inheritanchor[from=rectangle]{west}
-    \inheritanchor[from=rectangle]{south}
-    \inheritanchor[from=rectangle]{north}
-    \inheritanchor[from=rectangle]{north east}
-    \inheritanchor[from=rectangle]{north west}
-    \inheritanchor[from=rectangle]{south east}
-    \inheritanchor[from=rectangle]{south west}
+    \inheritrectangle
     \inheritanchor[from=roundedrectangle]{round north east}
     \inheritanchor[from=roundedrectangle]{round north west}
     \inheritanchor[from=roundedrectangle]{round south west}
     \inheritanchor[from=roundedrectangle]{round south east}
-    \inheritanchorborder[from=rectangle]
     \backgroundpath{
         \bpath@rr
         % towers should never be horizontal
@@ -678,6 +581,7 @@
         \repeatpgfmathloop%
         \pgfusepath{stroke}%
    }
+    \inheritanchorborder[from=rectangle]
 }
 %% LIBNODES
 % a way to alias anchors 
