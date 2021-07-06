@@ -1,7 +1,7 @@
 # Description
 
 This LaTeX package defines nodes and streams for drawing chemical engineering
-PFDs using the Tikz/PGF LaTeX package. The Tikz frontend for PGF provides the
+PFDs using the Tikz/PGF TeX package. The Tikz frontend for PGF provides the
 scaling, shifting, and positioning (alignment) operations needed. While the
 Tikz pic could achieve many of the same functions, it isn't as low-level and
 therefore extendable, and in particular it cannot be positioned by its anchors.
@@ -43,15 +43,15 @@ also be done.
   adjustments will generally be mismatched. This is done at
   https://github.com/dollodart/dev-cs for conformal layers with matching to the
   larger coordinate. That matching, or smoothing of discontinuities between
-  paths, is anyways done at a low level in PGF.
+  path segments, is anyways done at a low level in PGF.
 - Improve anchor border, which is currently using just the bounding shape.
   This would rarely be used because there are well-defined ports for these unit
-  operations. All node shapes are simple polygons, even if they have non-linear
-  parts like arcs. As a result, the general algorithm of evaluating the angle
-  incoming (relative to the center of the node) to determine what segment (or
-  arc) to calculate an intersection with can be used. In fact, the anchor border
-  would just be defined as the intersection with the segment that is farther out
-  if the shape were not simple.
+  operations. All node shapes are simple, even if they have non-linear parts like
+  arcs. As a result, the general algorithm of evaluating the angle incoming
+  (relative to the center of the node) to determine what segment (or arc) to
+  calculate an intersection with can be used. In fact, the anchor border would
+  just be defined as the intersection with the segment that is farther out if the
+  shape were not simple.
   
 ## Automatic orthogonal edge routing
 
@@ -63,7 +63,7 @@ already in the C++ libraries of the Dunnart program
 solutions can be implemented in PGF (that is, TeX). There is already the Tikz
 library paths.ortho at https://github.com/Qrrbrbirlbel/pgf. It is
 semi-automatic because the directions have to be specified, but can be extended
-to infer the directions the relative positions of the ports to each other and
+to infer the directions from the relative positions of the ports to each other and
 their respective nodes' anchor borders or bounding boxes. Currently it is
 limited to NSEW on square (or circle or similarly simple geometry) nodes but
 can be extended to go between arbitrary ports. The value of Tikz/PGF is precise
