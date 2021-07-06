@@ -1,0 +1,224 @@
+\ProvidesPackage{ortho-route}
+% see https://tex.stackexchange.com/questions/45347
+% https://tex.stackexchange.com/questions/102385
+% see the ortho tikz libraries defined in https://github.com/Qrrbrbirlbel/pgf referenced in those answers
+%
+% that library does node placement along the line with the tikz timer
+% for a "compound line", or sequence of contiguous line segments
+% one would generally be required to calculate the whole length of the path
+% then iterate and apply a \pgftransformlineattime to the node position
+%
+\def\east{0}
+\def\north{1}
+\def\west{2}
+\def\south{3}
+%
+\newdimen\minsep
+\minsep=.5cm
+\newdimen\elbowx
+\newdimen\elbowy
+\newdimen\scurvexa
+\newdimen\scurveya
+\newdimen\scurvexb
+\newdimen\scurveyb
+\newdimen\roriginx
+\newdimen\roriginy
+\newdimen\deltax
+\newdimen\deltay
+%
+\def\mypathstroke{% until customization for set arrow
+\pgfsetarrowsend{latex}
+\pgfusepath{stroke}
+\pgfsetarrowsend{}
+}
+%
+\def\applyrot@{
+\count10=\indir
+\countdef\cindir=10\relax
+\expandafter\ifcase\outdir\relax
+\def\angle{90}
+\advance\cindir by1
+\or
+\def\angle{0}
+\advance\cindir by0
+\or
+\def\angle{270}
+\advance\cindir by3
+\or
+\def\angle{180}
+\advance\cindir by2
+\fi
+% modulo addition and assign counter value as character
+\ifnum\cindir>3
+\advance\cindir by-4
+\fi
+\edef\indir{\the\cindir}
+\pgftransformshift{\pgfpoint{-\roriginx}{-\roriginy}}
+\pgftransformrotate{-\angle}
+}
+%
+\def\portho@{
+\deltax=\pgf@xd
+\advance\deltax by-\pgf@xa
+\deltay=\pgf@yd
+\advance\deltay by-\pgf@ya
+% the second point will always be north of outdir
+\pgf@xb=\pgf@xa
+\pgf@yb=\pgf@ya
+\advance\pgf@yb by\minsep
+% advance
+\expandafter\ifcase\indir\relax
+% N -> E
+\pgf@xc=\pgf@xd
+\advance\pgf@xc by\minsep
+\pgf@yc=\pgf@yd
+\ifdim\deltax<0pt
+  \ifdim\deltay<0pt
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \else
+    \elbowx=\pgf@xb
+    \elbowy=\pgf@yc
+  \fi
+\else
+  \ifdim\deltay<0pt
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \else
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \fi
+\fi
+\or
+% N -> N
+\pgf@xc=\pgf@xd
+\pgf@yc=\pgf@yd
+\advance\pgf@yc by\minsep
+\ifdim\deltax<0pt
+  \ifdim\deltay<0pt
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \else
+    \elbowx=\pgf@xb
+    \elbowy=\pgf@yc
+  \fi
+\else
+  \ifdim\deltay<0pt
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \else
+    \elbowx=\pgf@xb
+    \elbowy=\pgf@yc
+  \fi
+\fi
+\or
+% N -> W
+\pgf@xc=\pgf@xd
+\advance\pgf@xc by-\minsep
+\pgf@yc=\pgf@yd
+\ifdim\deltax<0pt
+  \ifdim\deltay<0pt
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \else
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \fi
+\else
+  \ifdim\deltay<0pt
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \else
+    \elbowx=\pgf@xb
+    \elbowy=\pgf@yc
+  \fi
+\fi
+\or
+% N -> S
+\pgf@xc=\pgf@xd
+\pgf@yc=\pgf@yd
+\advance\pgf@yc by-\minsep
+\ifdim\deltax<0pt
+  \ifdim\deltay<0pt
+    % ERROR case
+    \elbowx=0pt
+    \elbowy=0pt
+  \else
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \fi
+\else
+  \ifdim\deltay<0pt
+    % ERROR case
+    \elbowx=0pt
+    \elbowy=0pt
+  \else
+    \elbowx=\pgf@xc
+    \elbowy=\pgf@yb
+  \fi
+\fi
+\fi% end cases
+}
+%
+\def\reverserot@{
+\pgftransformrotate{\angle}
+\pgftransformshift{\pgfpoint{\roriginx}{\roriginy}}
+}
+%
+\def\nsedgecase@{
+% S-curve logic
+% note one can use \newifscurve and \scurvetrue, see CH 20 TeXbook
+\def\doscurve{F}
+\if\indir3 % N -> S
+  \ifdim\deltay<2\minsep
+    \def\doscurve{T}
+  \fi
+\fi
+%
+\if T\doscurve%
+  \scurvexa=.5\pgf@xa 
+  \advance\scurvexa by.5\pgf@xd
+  \scurveya=\pgf@yb
+  \scurvexb=\scurvexa
+  \scurveyb=\pgf@yc
+\fi
+}
+% this assumes node port is NESW and to travel margin length same direction as the edge that port is on (relative to center)
+\def\portho (#1.#2) to (#3.#4);{
+\edef\outdir{\expandafter\csname #2\endcsname} % output node direction (flow from)
+\edef\indir{\expandafter\csname #4\endcsname} % input node direction
+\pgfextractx{\roriginx}{\pgfpointanchor{#1}{center}}
+\pgfextracty{\roriginy}{\pgfpointanchor{#1}{center}}
+%
+\applyrot@
+%
+\pgfpointanchor{#3}{#4}
+\pgf@xd=\pgf@x
+\pgf@yd=\pgf@y
+\pgfpointanchor{#1}{#2}
+\pgf@xa=\pgf@x
+\pgf@ya=\pgf@y
+%
+\portho@
+%
+\nsedgecase@
+%
+\if T\doscurve
+  \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+  \pgfpathlineto{\pgfpoint{\scurvexa}{\scurveya}}
+  \pgfpathlineto{\pgfpoint{\scurvexb}{\scurveyb}}
+  \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+  \pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
+\else
+  \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+  \pgfpathlineto{\pgfpoint{\elbowx}{\elbowy}}
+  \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+  \pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
+\fi
+%
+\reverserot@
+%
+\mypathstroke
+}

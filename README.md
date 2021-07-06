@@ -71,3 +71,8 @@ control of the appearance, except maybe for automatic orthogonal graph creation
 on large numbers of (generally simple) nodes, which is not the use case for
 PFDs. But some users may still like to simply specify what ports should be
 connected at least for a subset of the streams.
+
+A proof of concept implementation of automatic edge routing between pairs using
+the NSEW anchors is provided. It accounts for relative positions of ports, but
+a more general algorithm accounts also for the ports positions on their anchor
+borders to prevent self-crossing.
