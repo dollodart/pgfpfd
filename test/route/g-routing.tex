@@ -1,0 +1,22 @@
+\documentclass[tikz,margin=.5cm]{standalone}
+\usepackage{ortho-route}
+
+\begin{document}
+
+
+\begin{tikzpicture}[every node/.style={circle, draw, minimum size=.1cm}]
+\node (a) at (0,0) {};
+\node (b) at (1,1.1) {};
+\node (c) at (-1,1) {};
+\node (d) at (-1,-1) {};
+\node (e) at (1,-1.1) {};
+
+\porthofinitewidth (a.north) to (b.east);
+\porthofinitewidth (a.north) to (c.east);
+\porthofinitewidth (a.north) to (d.east);
+\porthofinitewidth (a.north) to (e.east);
+
+
+\end{tikzpicture}
+
+\end{document}

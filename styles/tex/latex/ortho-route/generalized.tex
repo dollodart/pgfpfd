@@ -1,0 +1,189 @@
+% below is arbitrary anchor position at least on bounding box
+% and doesn't require specifying outgoing or incoming direction of the nodes
+
+\def\porthofinitewidth (#1.#2) to (#3.#4){
+\newif\ifoutportonnorth % need to be initialized to false
+\newif\ifoutportonsouth
+\newif\ifoutportoneast
+\newif\ifoutportonwest
+\newif\ifinportonnorth
+\newif\ifinportonsouth
+\newif\ifinportoneast
+\newif\ifinportonwest
+\newif\ifoutputsouth
+\newif\ifoutputwest
+\pgfpointanchor{#1}{#2} % outport
+\pgf@xa=\pgf@x
+\pgf@ya=\pgf@y
+\pgfpointanchor{#3}{#4} % inport
+\pgf@xd=\pgf@x
+\pgf@yd=\pgf@y
+%
+\pgfpointanchor{#1}{north}\ifdim\pgf@y=\pgf@ya\outportonnorthtrue\else
+  \pgfpointanchor{#1}{south}\ifdim\pgf@y=\pgf@ya\outportonsouthtrue\else
+    \pgfpointanchor{#1}{west}\ifdim\pgf@x=\pgf@xa\outportonwesttrue\else
+      \outportoneasttrue
+    \fi
+  \fi
+\fi
+%
+% this is if the port, rather than node, is south/west
+\ifdim\pgf@yd<\pgf@ya\outputsouthfalse\else\outputsouthtrue\fi
+\ifdim\pgf@xd<\pgf@xa\outputwestfalse\else\outputwesttrue\fi
+% this is exhaustive testing of relative positions of ports to their respective nodes
+% and of ports to each other
+% the entire branching logic can be placed in here
+\ifoutportonwest
+  \ifoutputwest
+    \ifoutputsouth
+      \pgfpointanchor{#1}{north}\pgf@ya=\pgf@y\advance\pgf@xa by-\minsep
+      \edef\outdir{\csname north\endcsname}
+      % also then go north at least the north boundary of the output node
+    \else % output north of input
+      \pgfpointanchor{#1}{south}\pgf@ya=\pgf@y\advance\pgf@xa by-\minsep
+      \edef\outdir{\csname south\endcsname}
+       % also then go south at least the south boundary of the output node
+    \fi
+  \else % output east of input
+    \edef\outdir{\csname west\endcsname}
+  \fi
+\fi
+\ifoutportoneast
+  \ifoutputwest
+    \edef\outdir{\csname east\endcsname}
+  \else % output east of input
+    \ifoutputsouth
+      \pgfpointanchor{#1}{north}\pgf@ya=\pgf@y\advance\pgf@xa by\minsep
+      \edef\outdir{\csname north\endcsname}
+    \else % output north of input
+      \pgfpointanchor{#1}{south}\pgf@ya=\pgf@y\advance\pgf@xa by\minsep
+      \edef\outdir{\csname south\endcsname}
+    \fi
+  \fi
+\fi
+\ifoutportonnorth
+  \ifoutputsouth
+    \edef\outdir{\csname north\endcsname}
+  \else     
+    \ifoutputwest
+      \pgfpointanchor{#1}{east}\pgf@xa=\pgf@x\advance\pgf@ya by\minsep
+      \edef\outdir{\csname east\endcsname}
+    \else
+      \pgfpointanchor{#1}{west}\pgf@xa=\pgf@x\advance\pgf@ya by\minsep
+      \edef\outdir{\csname west\endcsname}
+    \fi
+  \fi
+\fi
+\ifoutportonsouth
+  \ifoutputsouth % output south of input
+    \ifoutputwest % output west of input 
+      \pgfpointanchor{#1}{east}\pgf@xa=\pgf@x\advance\pgf@ya by-\minsep
+      \edef\outdir{\csname east\endcsname}
+    \else
+      \pgfpointanchor{#1}{west}\pgf@xa=\pgf@x\advance\pgf@ya by-\minsep
+      \edef\outdir{\csname west\endcsname}
+    \fi
+  \else     
+    \edef\outdir{\csname south\endcsname}
+  \fi
+\fi
+%% same logic applied to inport
+\pgfpointanchor{#3}{north}\ifdim\pgf@y=\pgf@yd\inportonnorthtrue\else
+  \pgfpointanchor{#3}{south}\ifdim\pgf@y=\pgf@yd\inportonsouthtrue\else
+    \pgfpointanchor{#3}{west}\ifdim\pgf@x=\pgf@xd\inportonwesttrue\else
+      \inportoneasttrue
+    \fi
+  \fi
+\fi
+\ifinportonwest
+  \ifoutputwest
+    \edef\indir{\csname west\endcsname}
+  \else % input is west
+    \ifoutputsouth
+      \pgfpointanchor{#3}{south}\pgf@yd=\pgf@y\advance\pgf@xd by-\minsep
+      \edef\indir{\csname south\endcsname}
+    \else
+      \pgfpointanchor{#3}{north}\pgf@yd=\pgf@y\advance\pgf@xd by-\minsep
+      \edef\indir{\csname north\endcsname}
+    \fi
+  \fi
+\fi
+\ifinportoneast
+  \ifoutputwest
+    \ifoutputsouth
+      \pgfpointanchor{#3}{south}\pgf@yd=\pgf@y\advance\pgf@xd by\minsep
+      \edef\indir{\csname south\endcsname}
+    \else % input is south
+      \pgfpointanchor{#3}{north}\pgf@yd=\pgf@y\advance\pgf@xd by\minsep
+      \edef\indir{\csname north\endcsname}
+    \fi
+  \else
+    \edef\indir{\csname east\endcsname}
+  \fi
+\fi
+\ifinportonsouth
+  \ifoutputsouth
+    \edef\indir{\csname south\endcsname}
+  \else % input is south
+    \ifoutputwest
+      \pgfpointanchor{#3}{west}\pgf@xd=\pgf@x\advance\pgf@yd by-\minsep
+      \edef\indir{\csname west\endcsname}
+    \else
+      \pgfpointanchor{#3}{east}\pgf@xd=\pgf@x\advance\pgf@yd by-\minsep
+      \edef\indir{\csname east\endcsname}
+    \fi
+  \fi
+\fi
+\ifinportonnorth
+  \ifoutputsouth 
+    \ifoutputwest 
+      \pgfpointanchor{#3}{west}\pgf@xd=\pgf@x\advance\pgf@yd by\minsep
+      \edef\indir{\csname west\endcsname}
+    \else % input west
+      \pgfpointanchor{#3}{east}\pgf@xd=\pgf@x\advance\pgf@yd by\minsep
+      \edef\indir{\csname east\endcsname}
+    \fi
+  \else % input south
+    \edef\indir{\csname north\endcsname}
+  \fi
+\fi
+%
+% need to L-join the output port and start and the input port and end
+% portho@ is effectively an L-join algorithm with edge case when the distance is too small
+% TODO: factor into L-join and S-join algorithms with check on which to call?
+\pgfcoordinate{start}{\pgfpoint{\pgf@xa}{\pgf@ya}}
+\pgfcoordinate{end}{\pgfpoint{\pgf@xd}{\pgf@yd}}
+\applyrot@
+\pgfpointanchor{end}{center}
+\pgf@xd=\pgf@x
+\pgf@yd=\pgf@y
+\pgfpointanchor{start}{center}
+\pgf@xa=\pgf@x
+\pgf@ya=\pgf@y
+\portho@
+%
+\nsedgecase@
+%
+\if T\doscurve
+  \pgfpathmoveto{\pgfpointanchor{#1}{#2}}
+  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+  \pgfpathlineto{\pgfpoint{\scurvexa}{\scurveya}}
+  \pgfpathlineto{\pgfpoint{\scurvexb}{\scurveyb}}
+  \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+  \pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
+%  \pgfpathlineto{\pgfpointanchor{#3}{#4}} % this can mess up arrow placement if it's the same coordinate
+\else
+  \pgfpathmoveto{\pgfpointanchor{#1}{#2}}
+  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
+  \pgfpathlineto{\pgfpoint{\elbowx}{\elbowy}}
+  \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+  \pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
+%  \pgfpathlineto{\pgfpointanchor{#3}{#4}}
+\fi
+%
+\reverserot@
+%
+\mypathstroke
+}
