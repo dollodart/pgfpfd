@@ -73,6 +73,7 @@ PFDs. But some users may still like to simply specify what ports should be
 connected at least for a subset of the streams.
 
 A proof of concept implementation of automatic edge routing between pairs using
-the NSEW anchors is provided. It accounts for relative positions of ports, but
-a more general algorithm accounts also for the ports positions on their anchor
-borders to prevent self-crossing.
+the NSEW anchors is provided (portho) which accounts for relative positions of
+ports. A similar proof of concept implementation between arbitrary anchors,
+provided they exist on the anchor border, is given which accounts
+(incompletely) for the finite width of the nodes.
