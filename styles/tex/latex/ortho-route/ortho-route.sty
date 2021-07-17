@@ -35,26 +35,25 @@
 \def\applyrot@{
 \count10=\indir
 \countdef\cindir=10\relax
+\count53=0
+\countdef\rotor=53\relax
 \expandafter\ifcase\outdir\relax
-\def\angle{90}
-\advance\cindir by1
+\advance\rotor by1
 \or
-\def\angle{0}
-\advance\cindir by0
+\advance\rotor by0
 \or
-\def\angle{270}
-\advance\cindir by3
+\advance\rotor by3
 \or
-\def\angle{180}
-\advance\cindir by2
+\advance\rotor by2
 \fi
 % modulo addition and assign counter value as character
+\advance\cindir by\rotor
 \ifnum\cindir>3
 \advance\cindir by-4
 \fi
 \edef\indir{\the\cindir}
 \pgftransformshift{\pgfpoint{-\roriginx}{-\roriginy}}
-\pgftransformrotate{-\angle}
+\pgftransformrotate{-90*\rotor}
 }
 %
 \def\portho@{
@@ -161,7 +160,7 @@
 }
 %
 \def\reverserot@{
-\pgftransformrotate{\angle}
+\pgftransformrotate{90*\rotor}
 \pgftransformshift{\pgfpoint{\roriginx}{\roriginy}}
 }
 %
