@@ -1,0 +1,43 @@
+\documentclass[tikz,margin=.5cm]{standalone}
+\usepackage{ortho-route}
+
+\minsep=.25cm
+
+\begin{document}
+
+\begin{tikzpicture}[every node/.style={draw, minimum size=.25cm}]
+
+\node[minimum width=2.5cm,minimum height=1cm] (a) at (0,0) {};
+%\node[minimum height=3cm,minimum width=1cm] (a) at (0,0) {};
+\node (b) at (1,1.1) {};
+\node (c) at (-1,1) {};
+\node (d) at (-1,-1) {};
+\node (e) at (1,-1.1) {};
+% E -> N
+%\porthofinitewidth (a.east) to (b.north);
+%\porthofinitewidth (a.east) to (c.north);
+%\porthofinitewidth (a.east) to (d.north);
+%\porthofinitewidth (a.east) to (e.north);
+
+% N -> E 
+\porthofinitewidth (a.north) to (b.east);
+\porthofinitewidth (a.north) to (c.east);
+\porthofinitewidth (a.north) to (d.east);
+\porthofinitewidth (a.north) to (e.east);
+
+\color{blue}
+\pgfsetdash{{.1cm}}{.1cm}
+
+\portho (a.north) to (b.east);
+\portho (a.north) to (c.east);
+\portho (a.north) to (d.east);
+\portho (a.north) to (e.east);
+
+%\portho (a.east) to (b.north);
+%\portho (a.east) to (c.north);
+%\portho (a.east) to (d.north);
+%\portho (a.east) to (e.north);
+
+\end{tikzpicture}
+
+\end{document}

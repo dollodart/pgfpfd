@@ -152,13 +152,10 @@
   \fi
 \fi
 %
-% need to L-join the output port and start and the input port and end
-% portho@ is effectively an L-join algorithm with edge case when the distance is too small
-% TODO: factor into L-join and S-join algorithms with check on which to call?
-% problem is rotation and orientation is defined for the inner L- (or S-) join
 \pgfcoordinate{start}{\pgfpoint{\pgf@xa}{\pgf@ya}}
 \pgfcoordinate{end}{\pgfpoint{\pgf@xd}{\pgf@yd}}
 %
+% First L
 \pgfpointanchor{#1}{#2}
 \pgf@xa=\pgf@x
 \pgf@ya=\pgf@y
@@ -179,7 +176,7 @@
   \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
 \fi
 \pgfpathlineto{\pgfpointanchor{start}{center}}
-  
+% Middle L (or S) 
 \applyrot@
 \pgfpointanchor{start}{center}
 \pgf@xa=\pgf@x
@@ -191,7 +188,7 @@
 \portho@
 %
 \nsedgecase@
-%
+
 \if T\doscurve
   \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
   \pgfpathlineto{\pgfpoint{\scurvexa}{\scurveya}}
@@ -206,6 +203,7 @@
 %
 \pgfpathlineto{\pgfpointanchor{end}{center}}
 %
+% Last L
 \pgfpointanchor{end}{center}
 \pgf@xa=\pgf@x
 \pgf@ya=\pgf@y
@@ -225,6 +223,6 @@
   \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
 \fi
 \pgfpathlineto{\pgfpointanchor{#3}{#4}}
-%
+
 \pgfusepath{stroke}%\mypathstroke
 }

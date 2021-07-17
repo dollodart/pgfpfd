@@ -1,0 +1,98 @@
+\documentclass[tikz,margin=.5cm]{standalone}
+\usepackage{ortho-route}
+
+\begin{document}
+
+% N -> E 
+\def\ne{
+\porthofinitewidth (a.north) to (b.east);
+\porthofinitewidth (a.north) to (c.east);
+\porthofinitewidth (a.north) to (d.east);
+\porthofinitewidth (a.north) to (e.east);
+}
+
+% N -> N
+\def\nn{
+\porthofinitewidth (a.north) to (b.north);
+\porthofinitewidth (a.north) to (c.north);
+\porthofinitewidth (a.north) to (d.north);
+\porthofinitewidth (a.north) to (e.north);
+}
+
+% test rotation logic (equivalent to above but rotated)
+\def\ee{
+\porthofinitewidth (a.east) to (b.east);
+\porthofinitewidth (a.east) to (c.east);
+\porthofinitewidth (a.east) to (d.east);
+\porthofinitewidth (a.east) to (e.east);
+}
+
+\def\ss{
+\porthofinitewidth (a.south) to (b.south);
+\porthofinitewidth (a.south) to (c.south);
+\porthofinitewidth (a.south) to (d.south);
+\porthofinitewidth (a.south) to (e.south);
+}
+
+\def\ww{
+\porthofinitewidth (a.west) to (b.west);
+\porthofinitewidth (a.west) to (c.west);
+\porthofinitewidth (a.west) to (d.west);
+\porthofinitewidth (a.west) to (e.west);
+}
+
+% N -> W
+\def\nw{
+\porthofinitewidth (a.north) to (b.west);
+\porthofinitewidth (a.north) to (c.west);
+\porthofinitewidth (a.north) to (d.west);
+\porthofinitewidth (a.north) to (e.west);
+}
+
+% N -> S (will generally require more node separation since 2 times in direction
+\def\ns{
+\porthofinitewidth (a.north) to (b.south);
+\porthofinitewidth (a.north) to (c.south);
+\porthofinitewidth (a.north) to (d.south); % ERROR case without S-curve
+\porthofinitewidth (a.north) to (e.south); % ERROR case without S-curve
+}
+
+\def\sn{ % another test of rotation logic
+\porthofinitewidth (a.south) to (b.north);
+\porthofinitewidth (a.south) to (c.north);
+\porthofinitewidth (a.south) to (d.north); % ERROR case without S-curve
+\porthofinitewidth (a.south) to (e.north); % ERROR case without S-curve
+}
+
+\def\limiting{
+% limiting cases
+\node[above=1cm] (an) at (a) {};
+\node[below=1cm] (as) at (a) {};
+\node[right=1cm] (ae) at (a) {};
+\node[left=1cm] (aw) at (a) {};
+\porthofinitewidth (a.north) to (an.south);
+\porthofinitewidth (a.north) to (ae.west);
+\porthofinitewidth (a.north) to (as.north);
+\porthofinitewidth (a.north) to (aw.east);
+}
+
+
+\begin{tikzpicture}[every node/.style={circle, draw, minimum size=.1cm}]
+\node (a) at (0,0) {};
+\node (b) at (1,1.1) {};
+\node (c) at (-1,1) {};
+\node (d) at (-1,-1) {};
+\node (e) at (1,-1.1) {};
+
+\ne
+%\nn
+%\ee
+%\ss
+%\ww
+%\nw
+%\ns
+%\sn
+%\limiting
+\end{tikzpicture}
+
+\end{document}
