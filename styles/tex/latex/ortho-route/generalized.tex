@@ -1,6 +1,10 @@
 % below is arbitrary anchor position at least on bounding box
 % and doesn't require specifying outgoing or incoming direction of the nodes
 
+%\comp can be used sometime later
+\newdimen\comp
+\comp=0pt
+
 \def\porthofinitewidth (#1.#2) to (#3.#4){
 \newif\ifoutportonnorth % need to be initialized to false
 \newif\ifoutportonsouth
@@ -36,11 +40,11 @@
 \ifoutportonwest
   \ifoutputwest
     \ifoutputsouth
-      \pgfpointanchor{#1}{north}\pgf@ya=\pgf@y\advance\pgf@xa by-\minsep
+      \pgfpointanchor{#1}{north}\pgf@ya=\pgf@y\advance\pgf@ya by-\comp\advance\pgf@xa by-\minsep
       \edef\outdir{\csname north\endcsname}
       % also then go north at least the north boundary of the output node
     \else % output north of input
-      \pgfpointanchor{#1}{south}\pgf@ya=\pgf@y\advance\pgf@xa by-\minsep
+      \pgfpointanchor{#1}{south}\pgf@ya=\pgf@y\advance\pgf@ya by\comp\advance\pgf@xa by-\minsep
       \edef\outdir{\csname south\endcsname}
        % also then go south at least the south boundary of the output node
     \fi
@@ -53,10 +57,10 @@
     \edef\outdir{\csname east\endcsname}
   \else % output east of input
     \ifoutputsouth
-      \pgfpointanchor{#1}{north}\pgf@ya=\pgf@y\advance\pgf@xa by\minsep
+      \pgfpointanchor{#1}{north}\pgf@ya=\pgf@y\advance\pgf@ya by-\comp\advance\pgf@xa by\minsep
       \edef\outdir{\csname north\endcsname}
     \else % output north of input
-      \pgfpointanchor{#1}{south}\pgf@ya=\pgf@y\advance\pgf@xa by\minsep
+      \pgfpointanchor{#1}{south}\pgf@ya=\pgf@y\advance\pgf@ya by\comp\advance\pgf@xa by\minsep
       \edef\outdir{\csname south\endcsname}
     \fi
   \fi
@@ -66,10 +70,10 @@
     \edef\outdir{\csname north\endcsname}
   \else     
     \ifoutputwest
-      \pgfpointanchor{#1}{east}\pgf@xa=\pgf@x\advance\pgf@ya by\minsep
+      \pgfpointanchor{#1}{east}\pgf@xa=\pgf@x\advance\pgf@xa by-\comp\advance\pgf@ya by\minsep
       \edef\outdir{\csname east\endcsname}
     \else
-      \pgfpointanchor{#1}{west}\pgf@xa=\pgf@x\advance\pgf@ya by\minsep
+      \pgfpointanchor{#1}{west}\pgf@xa=\pgf@x\advance\pgf@xa by\comp\advance\pgf@ya by\minsep
       \edef\outdir{\csname west\endcsname}
     \fi
   \fi
@@ -77,10 +81,10 @@
 \ifoutportonsouth
   \ifoutputsouth % output south of input
     \ifoutputwest % output west of input 
-      \pgfpointanchor{#1}{east}\pgf@xa=\pgf@x\advance\pgf@ya by-\minsep
+      \pgfpointanchor{#1}{east}\pgf@xa=\pgf@x\advance\pgf@xa by-\comp\advance\pgf@ya by-\minsep
       \edef\outdir{\csname east\endcsname}
     \else
-      \pgfpointanchor{#1}{west}\pgf@xa=\pgf@x\advance\pgf@ya by-\minsep
+      \pgfpointanchor{#1}{west}\pgf@xa=\pgf@x\advance\pgf@xa by\comp\advance\pgf@ya by-\minsep
       \edef\outdir{\csname west\endcsname}
     \fi
   \else     
@@ -100,10 +104,10 @@
     \edef\indir{\csname west\endcsname}
   \else % input is west
     \ifoutputsouth
-      \pgfpointanchor{#3}{south}\pgf@yd=\pgf@y\advance\pgf@xd by-\minsep
+      \pgfpointanchor{#3}{south}\pgf@yd=\pgf@y\advance\pgf@yd by\comp\advance\pgf@xd by-\minsep
       \edef\indir{\csname south\endcsname}
     \else
-      \pgfpointanchor{#3}{north}\pgf@yd=\pgf@y\advance\pgf@xd by-\minsep
+      \pgfpointanchor{#3}{north}\pgf@yd=\pgf@y\advance\pgf@yd by-\comp\advance\pgf@xd by-\minsep
       \edef\indir{\csname north\endcsname}
     \fi
   \fi
@@ -111,10 +115,10 @@
 \ifinportoneast
   \ifoutputwest
     \ifoutputsouth
-      \pgfpointanchor{#3}{south}\pgf@yd=\pgf@y\advance\pgf@xd by\minsep
+      \pgfpointanchor{#3}{south}\pgf@yd=\pgf@y\advance\pgf@yd by\comp\advance\pgf@xd by\minsep
       \edef\indir{\csname south\endcsname}
     \else % input is south
-      \pgfpointanchor{#3}{north}\pgf@yd=\pgf@y\advance\pgf@xd by\minsep
+      \pgfpointanchor{#3}{north}\pgf@yd=\pgf@y\advance\pgf@yd by-\comp\advance\pgf@xd by\minsep
       \edef\indir{\csname north\endcsname}
     \fi
   \else
@@ -126,10 +130,10 @@
     \edef\indir{\csname south\endcsname}
   \else % input is south
     \ifoutputwest
-      \pgfpointanchor{#3}{west}\pgf@xd=\pgf@x\advance\pgf@yd by-\minsep
+      \pgfpointanchor{#3}{west}\pgf@xd=\pgf@x\advance\pgf@xd by\comp\advance\pgf@yd by-\minsep
       \edef\indir{\csname west\endcsname}
     \else
-      \pgfpointanchor{#3}{east}\pgf@xd=\pgf@x\advance\pgf@yd by-\minsep
+      \pgfpointanchor{#3}{east}\pgf@xd=\pgf@x\advance\pgf@xd by-\comp\advance\pgf@yd by-\minsep
       \edef\indir{\csname east\endcsname}
     \fi
   \fi
@@ -137,10 +141,10 @@
 \ifinportonnorth
   \ifoutputsouth 
     \ifoutputwest 
-      \pgfpointanchor{#3}{west}\pgf@xd=\pgf@x\advance\pgf@yd by\minsep
+      \pgfpointanchor{#3}{west}\pgf@xd=\pgf@x\advance\pgf@xd by\comp\advance\pgf@yd by\minsep
       \edef\indir{\csname west\endcsname}
     \else % input west
-      \pgfpointanchor{#3}{east}\pgf@xd=\pgf@x\advance\pgf@yd by\minsep
+      \pgfpointanchor{#3}{east}\pgf@xd=\pgf@x\advance\pgf@xd by-\comp\advance\pgf@yd by\minsep
       \edef\indir{\csname east\endcsname}
     \fi
   \else % input south
@@ -151,39 +155,76 @@
 % need to L-join the output port and start and the input port and end
 % portho@ is effectively an L-join algorithm with edge case when the distance is too small
 % TODO: factor into L-join and S-join algorithms with check on which to call?
+% problem is rotation and orientation is defined for the inner L- (or S-) join
 \pgfcoordinate{start}{\pgfpoint{\pgf@xa}{\pgf@ya}}
 \pgfcoordinate{end}{\pgfpoint{\pgf@xd}{\pgf@yd}}
+%
+\pgfpointanchor{#1}{#2}
+\pgf@xa=\pgf@x
+\pgf@ya=\pgf@y
+\pgfpointanchor{start}{center}
+\pgf@xb=\pgf@x
+\pgf@yb=\pgf@y
+\pgfpathmoveto{\pgfpointanchor{#1}{#2}}
+\ifoutportonwest
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+\fi
+\ifoutportoneast
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+\fi
+\ifoutportonnorth
+  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+\fi
+\ifoutportonsouth
+  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+\fi
+\pgfpathlineto{\pgfpointanchor{start}{center}}
+  
 \applyrot@
-\pgfpointanchor{end}{center}
-\pgf@xd=\pgf@x
-\pgf@yd=\pgf@y
 \pgfpointanchor{start}{center}
 \pgf@xa=\pgf@x
 \pgf@ya=\pgf@y
+\pgfpointanchor{end}{center}
+\pgf@xd=\pgf@x
+\pgf@yd=\pgf@y
+%
 \portho@
 %
 \nsedgecase@
 %
 \if T\doscurve
-  \pgfpathmoveto{\pgfpointanchor{#1}{#2}}
-  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
   \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
   \pgfpathlineto{\pgfpoint{\scurvexa}{\scurveya}}
   \pgfpathlineto{\pgfpoint{\scurvexb}{\scurveyb}}
   \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
-  \pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
-%  \pgfpathlineto{\pgfpointanchor{#3}{#4}} % this can mess up arrow placement if it's the same coordinate
 \else
-  \pgfpathmoveto{\pgfpointanchor{#1}{#2}}
-  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@ya}}
   \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yb}}
   \pgfpathlineto{\pgfpoint{\elbowx}{\elbowy}}
   \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
-  \pgfpathlineto{\pgfpoint{\pgf@xd}{\pgf@yd}}
-%  \pgfpathlineto{\pgfpointanchor{#3}{#4}}
 \fi
-%
 \reverserot@
 %
-\mypathstroke
+\pgfpathlineto{\pgfpointanchor{end}{center}}
+%
+\pgfpointanchor{end}{center}
+\pgf@xa=\pgf@x
+\pgf@ya=\pgf@y
+\pgfpointanchor{#3}{#4}
+\pgf@xb=\pgf@x
+\pgf@yb=\pgf@y
+\ifinportonwest
+  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+\fi
+\ifinportoneast
+  \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+\fi
+\ifinportonnorth
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+\fi
+\ifinportonsouth
+  \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+\fi
+\pgfpathlineto{\pgfpointanchor{#3}{#4}}
+%
+\pgfusepath{stroke}%\mypathstroke
 }
